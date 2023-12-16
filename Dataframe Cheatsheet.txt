@@ -1,0 +1,219 @@
+Cheatsheet
+EXPLORATION
+df.info()
+df.describe()
+
+SORTING
+df.sort_values(by =['column'], ascending = False)
+df.sort_values(by =['column','column'], ascending =[True,False])  Multiple sort
+
+SUBSETTING
+df['1 column']
+df[['first column','second col','third col']]
+
+df[df['column'] > 50]
+df[df['column']=='text']
+
+df[(df['column']=='text') & (df['column']=='text')]
+
+colour = df['color'].isin(['Black','Brown'])
+df[color]
+
+SUMMARY STATISTICS
+
+df['column'].mean(), .median(), .mode(), .min(), .max(), .var(), .std(), .sum(), .quantile()
+
+AGGREGATE FUNCTION
+
+def pct30(column):
+    return column.quantile(0.3)
+
+df['column'].agg(pct30)
+df[['column1','column1']].agg(pct30)
+
+df['column'].cumsum(), .cummax(), .cummin(), .cumprod()
+df['new_column'] = df['column'].cumsum()
+
+FINDING AND DROPPING DUPLICATES
+
+duplicate = df.duplicated()
+duplicate = df.duplicated(subset =[list of columns to subset with], inplace =True)
+df.drop_duplicates(inplace =True)
+
+df.drop_duplicates(subset =['name'], keep = 'first', inplace = True)
+df.drop_duplicates(subset=['name','breed'])
+
+COUNTING
+
+df['column'].value_counts(sort =True)
+df['column'].value_counts(normalize = True) -- proportion
+df['column'].value_counts(sort = True, normalize = True)
+
+GROUP SUMMARIES -- GROUPBY
+
+df.groupby(['colour'])['weight'].mean()
+df.groupby(['column'])['column'].agg([min,max,sum])
+df.groupby(['column1','column2'])['column'].mean()
+
+GROUP SUMMARIES USING PIVOT TABLE
+
+df.pivot_table(values = 'column', index = 'group_column')--- Average default
+df.pivot_table(values = 'column', index ='group_column', aggfunc=[np.mean,np.median])
+df.pivot_table(values ='column',index='group_col',columns ='group_col', fill_value = 0, margins = True)
+
+SETTING THE INDEX
+
+df.set_index('col_to_use')
+df.set_index(['col1','col2'])
+df.reset_index()
+df.reset_index(drop=True)
+
+df.loc[['col','col']]
+
+df.sort_index()
+df.sort_index(level=['col1','col2'], ascending =[True,False])
+
+SLICING AND SUBSETTING
+df.loc['from_row':'to_row'] --- slicing with outer index
+df.loc[('out_index','inner_index'):('out_index','inner_index')]--inner index slicing
+
+df.loc[:, 'start_col_name':'end_col_name']-- col slicing
+df.loc[('out_index','inner_index'):('out_index','inner_index'),'start_col':'end_col']
+df.set_index('col_to_use').sort_index()
+
+df.iloc[:,1:7]
+
+VISUALIZATION
+hist df['col'].hist(), plt.show()
+df['col'].hist(bins = 5)
+
+Bar df.plot(kind ='bar', title ='The tile'), plt.show()
+
+Line df.plot(x ='col', y='col', kind = 'line', rot = 45)
+
+Scatterplot df.plot(x='col',y='col', kind = 'scatter')
+sns.distplot(df['col'])
+sns.boxplot(x = 'churn', y = 'Account_Length', data = df, sym='', hue='additional col') --- sym removes outlier
+
+LAYERING PLOT
+df[df['sex']=='F']['num_col'].hist(alpha =0.7)
+df[df['sex']=='M']['num_col'].hist(alpha =0.7)
+plt.legend(['F','M'])
+plt.show()
+
+plt.legend(loc = 'upper right', labels = df.columns.values)
+
+
+MISSING VALUES
+
+df.isna()
+df.isna().any()
+df.isna().sum()
+df.isna().sum().plot(kind = 'bar'), plt.show()
+
+REMOVING MISSING VALUES
+
+df.dropna()
+df.fillna(0)
+df.drop(df[df['col'].isnull()].index, inplace =True)
+
+
+MISSING DATA ANOTHER COMPLETE COURSE
+dd = df['col'].unique()-- can use set to get unique value
+np.sort(dd)
+pd.read_csv('directory', na_values='.')
+
+
+DATA CLEANING
+int value 6$ this is string -- df['col'].str.strip('$'),  df['col'].astype('int')  
+assert df['col'].dtype == 'int'
+
+CATEGORICAL DATA INFORM OF INTEGER
+
+marital status [1,2,3] can be changed to
+df['marital'] = df['marital'].astype('category')
+
+ranges = [0,200000,500000,np.inf]   group_names = ['0-200k','200k-500k','500k+']     df['category']=pd.cut(df['col to cut'], bins = ranges,labels = group_names)
+
+mapping ={'one':1,'two':1, 'three':2}  df['numb'] = df['numb'].replace(mapping)
+or use df['numb'] = df['numb'].map(mapping)
+assert df['numb'].dtype =='int'
+
+
+OTHERS LIKE WHERE
+
+df['new_col'] = np.where(df['col']=='test_cond', True,False)
+
+DATE HANDLING AND DATA IMPORT
+
+pd.read_csv('directory', parse_dates=[date cols as list], na_values='.', error ='coerce')
+pd.read_csv('directory', parse_dates=True, infer_datetime_format = True, error ='coerce', index_col =0)
+
+TO UNSTACK GROUPED DATA
+
+ds = pd.DataFrame(ds.unstack(level=1))
+
+FEATURE ENGINEERING
+df.corr() -- Just to eliminate multicollinearity
+
+MODEL BUILDING AND EVALUATION
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import confusion_metrics, recall_score, precision_score
+
+from sklearn.metrics import roc_curve, roc_auc_score
+y_pred_proba = logreg.predict_proba(X_test)[:,1]
+
+fpr,tpr,thresholds = roc_curve(y_test,y_pred_proba)
+plt.plot(fpr,tpr)
+plt.xlabel('col')
+plt.ylabel('col')
+plt.plot([0,1],[0,1],'k--')
+plt.show()
+
+auc = roc_auc_score(y_test,y_pred)
+
+from sklearn.metrics import f1_score
+f1_score(y_test,y_pred)
+
+cm = confusion_matrix(y_test,y_pred)
+
+clf = RandomForestClassifier()
+clf.fit(X_train,y_train)
+y_pred = clf.predict(X_test)
+
+clf.score(X_test,y_test)
+
+
+TURNING MODELS
+from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
+param_grid ={'n_estimators':np.arange(10,30)}
+clf_cv = GridSearchCV(RandomForestClassifier(),param_grid)
+clf_cv.fit(X_train,y_train)
+clf_cv.best_params_
+clf_cv.best_score_
+
+FEATURE IMPORTANCE
+for randomforestclassifier
+importances = clf.feature_importances_
+plt.barh(range(X.shape[1]),importances)
+
+SORTING NOT NECESSARY
+
+sorted = np.argsort(importances)
+label = X.columns[sorted]
+plt.barh(range(X.shape[1]), importances[sorted], tick_label=label)
+plt.show()
+
+
+PANDAS AND NUMPY
+Can use k = np.column_stack(np.array1,np.array2,....) Then convert to dataframe pd.DataFrame(k, columns=['col1 name','col2',...]
+k['col'] returns a pandas series but k[['col']] returns a pandas dataframe
+
+To iterate over numpy use np.nditer(myarray)
+To iterate over Pandas us for lab,row in df.iterrows(): print(lab), print(row)
+
+
+ https://www.xn--berbrckungshilfe-studierende-06cf.de/login?email=s4kasadu%40uni-trier.de
+
+
+
